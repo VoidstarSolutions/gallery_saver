@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:js_interop';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -76,49 +77,42 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _takePhoto() async {
-    ImagePicker()
-        .getImage(source: ImageSource.camera)
-        .then((PickedFile recordedImage) {
-      if (recordedImage != null && recordedImage.path != null) {
-        setState(() {
-          firstButtonText = 'saving in progress...';
-        });
-        GallerySaver.saveImage(recordedImage.path, albumName: albumName)
-            .then((bool success) {
-          setState(() {
-            firstButtonText = 'image saved!';
-          });
-        });
-      }
-    });
+    final ImagePicker picker = ImagePicker();
+// Capture a photo.
+    final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+    if (photo.isDefinedAndNotNull) {
+      setState(() {
+        firstButtonText = 'saving in progress...';
+      });
+      await GallerySaver.saveImage(photo!.path, albumName: albumName);
+      setState(() {
+        firstButtonText = 'image saved!';
+      });
+    }
   }
 
   void _recordVideo() async {
-    ImagePicker()
-        .getVideo(source: ImageSource.camera)
-        .then((PickedFile recordedVideo) {
-      if (recordedVideo != null && recordedVideo.path != null) {
-        setState(() {
-          secondButtonText = 'saving in progress...';
-        });
-        GallerySaver.saveVideo(recordedVideo.path, albumName: albumName)
-            .then((bool success) {
-          setState(() {
-            secondButtonText = 'video saved!';
-          });
-        });
-      }
-    });
+    final ImagePicker picker = ImagePicker();
+    final video = await picker.pickVideo(source: ImageSource.camera);
+    if (video.isDefinedAndNotNull) {
+      setState(() {
+        secondButtonText = 'saving in progress...';
+      });
+      await GallerySaver.saveVideo(video!.path, albumName: albumName);
+
+      setState(() {
+        secondButtonText = 'video saved!';
+      });
+    }
   }
 
   // ignore: unused_element
   void _saveNetworkVideo() async {
     String path =
         'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
-    GallerySaver.saveVideo(path, albumName: albumName).then((bool success) {
-      setState(() {
-        print('Video is saved');
-      });
+    await GallerySaver.saveVideo(path, albumName: albumName);
+    setState(() {
+      print('Video is saved');
     });
   }
 
@@ -126,10 +120,9 @@ class _MyAppState extends State<MyApp> {
   void _saveNetworkImage() async {
     String path =
         'https://image.shutterstock.com/image-photo/montreal-canada-july-11-2019-600w-1450023539.jpg';
-    GallerySaver.saveImage(path, albumName: albumName).then((bool success) {
-      setState(() {
-        print('Image is saved');
-      });
+    await GallerySaver.saveImage(path, albumName: albumName);
+    setState(() {
+      print('Image is saved');
     });
   }
 }
@@ -170,6 +163,7 @@ class _ScreenshotWidgetState extends State<ScreenshotWidget> {
       screenshotButtonText = 'saving in progress...';
     });
     try {
+      /*
       //extract bytes
       final RenderRepaintBoundary boundary =
           _globalKey.currentContext.findRenderObject();
@@ -190,6 +184,7 @@ class _ScreenshotWidgetState extends State<ScreenshotWidget> {
           screenshotButtonText = 'screenshot saved!';
         });
       });
+      */
     } catch (e) {
       print(e);
     }
